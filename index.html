@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Solicitud de Refacciones de Troqueles — Magna</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --azul:       #1a3a5c;
+    --azul-med:   #0f5fa0;
+    --azul-cl:    #d6e4f0;
+    --verde:      #1a7a1a;
+    --rojo:       #c0392b;
+    --gris-bg:    #f0f2f5;
+    --gris-card:  #ffffff;
+    --gris-borde: #dce1e8;
+    --gris-input: #f7f8fa;
+    --txt:        #1a1a2e;
+    --txt-muted:  #6b7280;
+    --radius:     10px;
+    --shadow:     0 2px 12px rgba(26,58,92,0.10);
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    background: var(--gris-bg);
+    color: var(--txt);
+    min-height: 100vh;
+    padding: 0 0 40px;
+  }
+
+  .site-header {
+    background: linear-gradient(135deg, var(--azul) 0%, var(--azul-med) 100%);
+    color: white;
+    padding: 20px 24px 18px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+  }
+  .site-header .logo-box {
+    width: 52px; height: 52px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; flex-shrink: 0;
+  }
+  .site-header h1 { font-size: 18px; font-weight: 600; line-height: 1.3; }
+  .site-header p  { font-size: 12px; opacity: 0.75; margin-top: 3px; }
+  .folio-badge {
+    margin-left: auto;
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .container { max-width: 860px; margin: 28px auto; padding: 0 16px; }
+
+  .card {
+    background: var(--gris-card);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--gris-borde);
+    margin-bottom: 18px;
+    overflow: hidden;
+  }
+  .card-header {
+    background: var(--azul-cl);
+    border-bottom: 1px solid var(--gris-borde);
+    padding: 11px 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-header span { font-size: 13px; font-weight: 600; color: var(--azul); }
+  .card-header .ico { font-size: 16px; }
+  .card-body { padding: 18px 20px 20px; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .full   { grid-column: 1 / -1; }
+
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  label  { font-size: 12px; font-weight: 600; color: #374151; }
+  label .req { color: var(--rojo); margin-left: 2px; }
+
+  input[type="text"],
+  input[type="number"],
+  input[type="date"],
+  select,
+  textarea {
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--txt);
+    background: var(--gris-input);
+    border: 1.5px solid var(--gris-borde);
+    border-radius: 8px;
+    padding: 9px 12px;
+    outline: none;
+    width: 100%;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    -webkit-appearance: none;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--azul-med);
+    box-shadow: 0 0 0 3px rgba(15,95,160,0.12);
+    background: #fff;
+  }
+  input.error, select.error, textarea.error {
+    border-color: var(--rojo);
+    box-shadow: 0 0 0 3px rgba(192,57,43,0.10);
+  }
+  textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+  select   { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%236b7280' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 30px; }
+
+  .parts-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .parts-table th {
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 8px 10px;
+    border-bottom: 1.5px solid var(--gris-borde);
+    text-align: left;
+    white-space: nowrap;
+  }
+  .parts-table td { padding: 5px 5px; vertical-align: middle; }
+  .parts-table tr:not(:last-child) td { border-bottom: 1px solid #f1f5f9; }
+  .parts-table input, .parts-table select {
+    font-size: 13px;
+    padding: 7px 9px;
+    border-radius: 7px;
+  }
+  .parts-table .col-desc     { min-width: 160px; width: 28%; }
+  .parts-table .col-cant     { min-width: 55px;  width: 7%; }
+  .parts-table .col-num      { min-width: 110px; width: 15%; }
+  .parts-table .col-uni      { min-width: 80px;  width: 10%; }
+  .parts-table .col-mro-yn   { min-width: 80px;  width: 10%; }
+  .parts-table .col-mro      { min-width: 100px; width: 13%; }
+  .parts-table .col-alta-mro { min-width: 80px;  width: 10%; }
+  .parts-table .col-del      { min-width: 44px;  width: 7%; text-align: center; }
+
+  .table-scroll-hint {
+    display: none;
+    font-size: 11px;
+    color: var(--txt-muted);
+    text-align: right;
+    margin-bottom: 4px;
+  }
+
+  .btn-del {
+    background: #fff0f0;
+    border: 1px solid #fca5a5;
+    border-radius: 7px;
+    color: var(--rojo);
+    width: 32px; height: 32px;
+    cursor: pointer;
+    font-size: 16px;
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+  }
+  .btn-del:hover { background: #fee2e2; }
+
+  .btn-add-row {
+    margin-top: 10px;
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #eff6ff;
+    border: 1.5px dashed #93c5fd;
+    border-radius: 8px;
+    color: var(--azul-med);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-add-row:hover { background: #dbeafe; }
+
+  .prioridad-info {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px;
+  }
+  .badge {
+    font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px;
+  }
+  .badge-urgente { background: #fee2e2; color: #991b1b; }
+  .badge-alta    { background: #ffedd5; color: #9a3412; }
+  .badge-media   { background: #fefce8; color: #713f12; }
+  .badge-baja    { background: #dcfce7; color: #14532d; }
+
+  .actions {
+    display: flex; gap: 12px; flex-wrap: wrap;
+    padding: 18px 20px;
+    background: #f8fafc;
+    border-top: 1px solid var(--gris-borde);
+    border-radius: 0 0 14px 14px;
+  }
+  .btn-save {
+    flex: 1; min-width: 160px;
+    background: var(--azul);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 13px 20px;
+    font-size: 14px; font-weight: 600; font-family: inherit;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .btn-save:hover  { background: #142e4a; }
+  .btn-save:active { transform: scale(0.98); }
+
+  .btn-excel {
+    flex: 1; min-width: 160px;
+    background: var(--verde);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 13px 20px;
+    font-size: 14px; font-weight: 600; font-family: inherit;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .btn-excel:hover  { background: #145c14; }
+  .btn-excel:active { transform: scale(0.98); }
+
+  .btn-reset {
+    background: white;
+    color: #6b7280;
+    border: 1.5px solid var(--gris-borde);
+    border-radius: 10px;
+    padding: 13px 16px;
+    font-size: 14px; font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-reset:hover { background: #f1f5f9; }
+
+  .parts-count {
+    font-size: 11px; color: var(--txt-muted);
+    text-align: right; margin-top: 6px;
+  }
+
+  .hist-empty { color: var(--txt-muted); font-size: 13px; font-style: italic; padding: 12px 0; }
+  .hist-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--gris-borde);
+    margin-bottom: 8px;
+    font-size: 13px;
+    background: #fafafa;
+  }
+  .hist-row .folio-tag { font-weight: 700; color: var(--azul); font-size: 13px; }
+  .hist-row .meta      { color: var(--txt-muted); font-size: 12px; margin-top: 2px; }
+  .hist-actions { display: flex; gap: 6px; }
+  .btn-hist-del {
+    background: #fff0f0; border: 1px solid #fca5a5;
+    border-radius: 6px; color: var(--rojo);
+    padding: 4px 10px; font-size: 12px; cursor: pointer;
+  }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--azul); color: white;
+    padding: 12px 24px; border-radius: 10px;
+    font-size: 14px; font-weight: 500;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+    opacity: 0; transition: opacity 0.3s, transform 0.3s;
+    pointer-events: none; white-space: nowrap; z-index: 999;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.green { background: var(--verde); }
+  .toast.red   { background: var(--rojo); }
+
+  footer {
+    text-align: center; font-size: 11px; color: #9ca3af;
+    padding: 20px 0 8px; margin-top: 8px;
+  }
+
+  @media (max-width: 600px) {
+    .site-header { flex-wrap: wrap; }
+    .folio-badge { margin-left: 0; width: 100%; text-align: center; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .full { grid-column: 1; }
+    .actions { flex-direction: column; }
+    .btn-save, .btn-excel { min-width: unset; }
+    .card-body { padding: 14px 14px 16px; }
+    .table-scroll-hint { display: block; }
+    .parts-table input, .parts-table select { min-width: 70px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="logo-box">🔧</div>
+  <div>
+    <h1>Solicitud de Refacciones de Troqueles</h1>
+    <p>Magna International · Mantenimiento de Herramientas</p>
+  </div>
+  <div class="folio-badge" id="folio-display">Folio: —</div>
+</header>
+
+<div class="container">
+
+  <!-- SOLICITANTE -->
+  <div class="card">
+    <div class="card-header">
+      <span class="ico">👤</span>
+      <span>Datos del solicitante</span>
+    </div>
+    <div class="card-body">
+      <div class="grid-2">
+        <div class="field">
+          <label>Nombre completo <span class="req">*</span></label>
+          <input type="text" id="nombre" placeholder="Nombre del técnico u operador" />
+        </div>
+        <div class="field">
+          <label>No. Empleado <span class="req">*</span></label>
+          <input type="text" id="empleado" placeholder="Ej. 12345" />
+        </div>
+        <div class="field">
+          <label>Departamento <span class="req">*</span></label>
+          <select id="depto">
+            <option value="">Seleccionar…</option>
+            <option>Producción</option>
+            <option>Ingeniería de Herramientas</option>
+            <option>Tooling</option>
+            <option>Calidad</option>
+            <option>Maquinado</option>
+            <option>Transferización</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Turno <span class="req">*</span></label>
+          <select id="turno">
+            <option value="">Seleccionar…</option>
+            <option>1° Turno (7:00–15:00)</option>
+            <option>2° Turno (15:00–22:30)</option>
+            <option>3° Turno (22:30–7:00)</option>
+            <option>Administrativo</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TROQUEL -->
+  <div class="card">
+    <div class="card-header">
+      <span class="ico">⚙️</span>
+      <span>Identificación del troquel</span>
+    </div>
+    <div class="card-body">
+      <div class="grid-2">
+        <div class="field">
+          <label>No. Troquel <span class="req">*</span></label>
+          <input type="text" id="troquel" placeholder="Ej. TR-2045" />
+        </div>
+        <div class="field">
+          <label>Línea / Prensa</label>
+          <input type="text" id="linea" placeholder="Ej. L-03 / P-07" />
+        </div>
+        <!-- ✅ CAMPO NUEVO: Operación -->
+        <div class="field">
+          <label>Operación</label>
+          <input type="text" id="operacion" placeholder="Ej. Corte, Doblez, Embutido…" />
+        </div>
+      </div>
+      <div class="grid-2" style="margin-top:14px">
+        <div class="field">
+          <label>Tipo de solicitud <span class="req">*</span></label>
+          <select id="tipo">
+            <option value="">Seleccionar…</option>
+            <option>Correctivo — Troquel detenido</option>
+            <option>Correctivo — Problema de calidad</option>
+            <option>Preventivo — Programa de mantenimiento</option>
+            <option>Mejora / Modificación</option>
+            <option>Reemplazo preventivo por desgaste</option>
+            <option>Cambio de Ingenieria</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Prioridad <span class="req">*</span></label>
+          <select id="prioridad">
+            <option value="">Seleccionar…</option>
+            <option value="URGENTE - Producción parada">🔴 URGENTE — Producción parada</option>
+            <option value="ALTA - Impacto en producción">🟠 ALTA — Impacto en producción</option>
+            <option value="MEDIA - Preventivo programado">🟡 MEDIA — Preventivo programado</option>
+            <option value="BAJA - Sin impacto inmediato">🟢 BAJA — Sin impacto inmediato</option>
+          </select>
+          <div class="prioridad-info">
+            <span class="badge badge-urgente">URGENTE</span>
+            <span class="badge badge-alta">ALTA</span>
+            <span class="badge badge-media">MEDIA</span>
+            <span class="badge badge-baja">BAJA</span>
+          </div>
+        </div>
+      </div>
+      <div class="field" style="margin-top:14px">
+        <label>Descripción del problema / motivo</label>
+        <textarea id="descripcion" placeholder="Describe el fallo, síntoma observado o motivo de la solicitud…"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- REFACCIONES -->
+  <div class="card">
+    <div class="card-header">
+      <span class="ico">📦</span>
+      <span>Refacciones solicitadas <span class="req">*</span></span>
+    </div>
+    <div class="card-body">
+      <p class="table-scroll-hint">← Desliza para ver todos los campos →</p>
+      <div style="overflow-x:auto;">
+        <table class="parts-table">
+          <thead>
+            <tr>
+              <th class="col-desc">Descripción de la refacción</th>
+              <th class="col-cant">Cant.</th>
+              <th class="col-num">No. Parte / Plano</th>
+              <th class="col-uni">Unidad</th>
+              <th class="col-mro-yn">Tiene MRO</th>
+              <th class="col-mro">MRO</th>
+              <th class="col-alta-mro">Alta MRO</th>
+              <th class="col-del"></th>
+            </tr>
+          </thead>
+          <tbody id="parts-body"></tbody>
+        </table>
+      </div>
+      <button class="btn-add-row" onclick="addPart()">＋ Agregar refacción</button>
+      <p class="parts-count" id="parts-count">0 refacciones</p>
+    </div>
+  </div>
+
+  <!-- ADICIONAL -->
+  <div class="card">
+    <div class="card-header">
+      <span class="ico">📋</span>
+      <span>Información adicional</span>
+    </div>
+    <div class="card-body">
+      <div class="grid-2">
+        <div class="field">
+          <label>Fecha requerida</label>
+          <input type="date" id="fecha-req" />
+        </div>
+        <div class="field">
+          <label>Autoriza (supervisor)</label>
+          <input type="text" id="autoriza" placeholder="Nombre del supervisor" />
+        </div>
+        <div class="field full">
+          <label>Observaciones</label>
+          <input type="text" id="obs" placeholder="Comentarios adicionales, proveedor sugerido, fotos disponibles…" />
+        </div>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn-save" onclick="guardar()">💾 Guardar solicitud</button>
+      <button class="btn-excel" onclick="exportExcel()">📊 Descargar Excel</button>
+      <button class="btn-reset" onclick="resetForm()" title="Nueva solicitud">↺ Limpiar</button>
+    </div>
+  </div>
+
+  <!-- CONSULTA -->
+  <div class="card">
+    <div class="card-header">
+      <span class="ico">🔍</span>
+      <span>Consulta tu solicitud</span>
+    </div>
+    <div class="card-body" style="display:flex; flex-direction:column; gap:10px;">
+      <p style="font-size:13px; color:#374151;">
+        Revisa el estatus de tus solicitudes directamente en el registro general. La hoja se abre en modo solo lectura — no podrás modificar nada.
+      </p>
+      <a
+        href="https://docs.google.com/spreadsheets/d/166cXWrttDcOJpuA7FhXKZjz4PgnquhpTyH5D-1EFRKY/view"
+        target="_blank"
+        rel="noopener noreferrer"
+        style="
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          background: #1a7a1a;
+          color: white;
+          border-radius: 10px;
+          padding: 13px 20px;
+          font-size: 14px;
+          font-weight: 600;
+          font-family: inherit;
+          text-decoration: none;
+          transition: background 0.2s;
+          width: 100%;
+          max-width: 320px;
+        "
+        onmouseover="this.style.background='#145c14'"
+        onmouseout="this.style.background='#1a7a1a'"
+      >
+        📊 Ver registro de solicitudes
+      </a>
+      <p style="font-size:11px; color:#9ca3af;">
+        Se abrirá en una nueva pestaña · Solo lectura
+      </p>
+    </div>
+  </div>
+
+  <!-- HISTORIAL -->
+  <div class="card">
+    <div class="card-header">
+      <span class="ico">🗂️</span>
+      <span>Solicitudes guardadas en este dispositivo</span>
+    </div>
+    <div class="card-body" id="historial-body">
+      <p class="hist-empty">No hay solicitudes guardadas aún.</p>
+    </div>
+  </div>
+
+</div>
+
+<footer>Magna International · Solicitud de Refacciones de Troqueles · v1.0</footer>
+<div class="toast" id="toast"></div>
+
+<script>
+  const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbz19KeOa6IcMIFNv2FoNkLozeuR92KT92Z8lA0hDVYmU4dEw3ncuuzpDnsWsErjy8s/exec';
+
+  const STORE_KEY = 'magna_refacciones_v2';
+  let records = [];
+  let partIdx = 0;
+
+  try { records = JSON.parse(localStorage.getItem(STORE_KEY) || '[]'); } catch(e) {}
+
+  function updateFolioDisplay(folio) {
+    document.getElementById('folio-display').textContent =
+      folio ? 'Folio: ' + folio : 'Folio: (se asigna al guardar)';
+  }
+
+  function addPart(desc='', cant='', num='', uni='pieza', tieneMro='', mro='', altaMro='') {
+    partIdx++;
+    const id = 'pr' + partIdx;
+    const tr = document.createElement('tr');
+    tr.id = id;
+    tr.innerHTML = `
+      <td class="col-desc"><input type="text" placeholder="Ej. Punzón redondo ø12mm" value="${desc}" /></td>
+      <td class="col-cant"><input type="number" min="1" placeholder="1" value="${cant}" style="text-align:center;"/></td>
+      <td class="col-num"><input type="text" placeholder="Ej. MP-0045" value="${num}" /></td>
+      <td class="col-uni">
+        <select>
+          <option ${uni==='pieza'?'selected':''}>pieza</option>
+          <option ${uni==='juego'?'selected':''}>juego</option>
+          <option ${uni==='metro'?'selected':''}>metro</option>
+          <option ${uni==='kg'?'selected':''}>kg</option>
+          <option ${uni==='litro'?'selected':''}>litro</option>
+        </select>
+      </td>
+      <td class="col-mro-yn">
+        <select>
+          <option value="" ${tieneMro===''?'selected':''}>—</option>
+          <option value="Sí" ${tieneMro==='Sí'?'selected':''}>Sí</option>
+          <option value="No" ${tieneMro==='No'?'selected':''}>No</option>
+        </select>
+      </td>
+      <td class="col-mro"><input type="text" placeholder="Cód. MRO" value="${mro}" /></td>
+      <td class="col-alta-mro">
+        <select>
+          <option value="" ${altaMro===''?'selected':''}>—</option>
+          <option value="Sí" ${altaMro==='Sí'?'selected':''}>Sí</option>
+          <option value="No" ${altaMro==='No'?'selected':''}>No</option>
+        </select>
+      </td>
+      <td class="col-del"><button class="btn-del" onclick="delPart('${id}')" title="Eliminar">✕</button></td>`;
+    document.getElementById('parts-body').appendChild(tr);
+    updatePartsCount();
+  }
+  function delPart(id) {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+    updatePartsCount();
+  }
+  function updatePartsCount() {
+    const n = document.querySelectorAll('#parts-body tr').length;
+    document.getElementById('parts-count').textContent = n + (n === 1 ? ' refacción' : ' refacciones');
+  }
+
+  function getForm() {
+    const parts = [];
+    document.querySelectorAll('#parts-body tr').forEach(tr => {
+      const ins  = tr.querySelectorAll('input');
+      const sels = tr.querySelectorAll('select');
+      const desc = ins[0].value.trim();
+      if (desc) parts.push({
+        descripcion:  desc,
+        cantidad:     ins[1].value || '1',
+        noPartePlano: ins[2].value.trim(),
+        unidad:       sels[0].value,
+        tieneMro:     sels[1].value,
+        mro:          ins[3].value.trim(),
+        altaMro:      sels[2].value
+      });
+    });
+    return {
+      fecha:          new Date().toLocaleString('es-MX'),
+      nombre:         v('nombre'),
+      empleado:       v('empleado'),
+      departamento:   v('depto'),
+      turno:          v('turno'),
+      troquel:        v('troquel'),
+      linea:          v('linea'),
+      operacion:      v('operacion'),   // ✅ NUEVO
+      tipoSolicitud:  v('tipo'),
+      prioridad:      v('prioridad'),
+      descripcion:    v('descripcion'),
+      fechaRequerida: v('fecha-req'),
+      autoriza:       v('autoriza'),
+      observaciones:  v('obs'),
+      refacciones:    parts
+    };
+  }
+  function v(id) { return document.getElementById(id).value.trim(); }
+
+  const required = ['nombre','empleado','depto','turno','troquel','tipo','prioridad'];
+  function clearErrors() { required.forEach(id => document.getElementById(id).classList.remove('error')); }
+  function validate(d) {
+    clearErrors();
+    const errors = [];
+    if (!d.nombre)        { markErr('nombre');   errors.push('Nombre del solicitante'); }
+    if (!d.empleado)      { markErr('empleado'); errors.push('No. de empleado'); }
+    if (!d.departamento)  { markErr('depto');    errors.push('Departamento'); }
+    if (!d.turno)         { markErr('turno');    errors.push('Turno'); }
+    if (!d.troquel)       { markErr('troquel');  errors.push('No. de troquel'); }
+    if (!d.tipoSolicitud) { markErr('tipo');     errors.push('Tipo de solicitud'); }
+    if (!d.prioridad)     { markErr('prioridad');errors.push('Prioridad'); }
+    if (!d.refacciones.length) errors.push('Al menos una refacción');
+    return errors;
+  }
+  function markErr(id) { document.getElementById(id).classList.add('error'); }
+
+  function guardar() {
+    const d    = getForm();
+    const errs = validate(d);
+    if (errs.length) { showToast('⚠ Falta: ' + errs.join(', '), 'red'); return; }
+
+    const btnGuardar = document.querySelector('.btn-save');
+    btnGuardar.disabled = true;
+    btnGuardar.textContent = '⏳ Guardando…';
+    showToast('⏳ Conectando con Google Sheets…');
+
+    const cbName = 'cb_' + Date.now();
+
+    const timer = setTimeout(() => {
+      cleanup();
+      const folioLocal = 'LOCAL-' + Date.now();
+      d.folio = folioLocal;
+      guardarLocal(d);
+      showToast('⚠ Sin respuesta del servidor — guardado local', 'red');
+      btnGuardar.disabled = false;
+      btnGuardar.textContent = '💾 Guardar solicitud';
+    }, 12000);
+
+    window[cbName] = function(resp) {
+      cleanup();
+      clearTimeout(timer);
+      btnGuardar.disabled = false;
+      btnGuardar.textContent = '💾 Guardar solicitud';
+
+      if (resp && resp.status === 'ok') {
+        d.folio = resp.folio;
+        guardarLocal(d);
+        showToast('✓ Solicitud ' + d.folio + ' guardada en Google Sheets', 'green');
+        renderHistorial();
+        setTimeout(() => { resetForm(); }, 1200);
+      } else {
+        const folioLocal = 'LOCAL-' + Date.now();
+        d.folio = folioLocal;
+        guardarLocal(d);
+        showToast('⚠ Error del servidor — guardado local', 'red');
+        renderHistorial();
+      }
+    };
+
+    const script = document.createElement('script');
+    script.id  = 'jsonp_' + cbName;
+    script.src = SHEETS_URL
+      + '?callback=' + cbName
+      + '&data=' + encodeURIComponent(JSON.stringify(d));
+    script.onerror = function() {
+      cleanup();
+      clearTimeout(timer);
+      const folioLocal = 'LOCAL-' + Date.now();
+      d.folio = folioLocal;
+      guardarLocal(d);
+      showToast('⚠ Sin conexión — guardado local', 'red');
+      renderHistorial();
+      btnGuardar.disabled = false;
+      btnGuardar.textContent = '💾 Guardar solicitud';
+    };
+    document.body.appendChild(script);
+
+    function cleanup() {
+      const el = document.getElementById('jsonp_' + cbName);
+      if (el) el.remove();
+      delete window[cbName];
+    }
+  }
+
+  function guardarLocal(d) {
+    records.push(d);
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(records)); } catch(e) {}
+  }
+
+  function flatRows(recs) {
+    const rows = [];
+    recs.forEach(r => {
+      const parts = r.refacciones && r.refacciones.length ? r.refacciones : [{}];
+      parts.forEach(p => rows.push({
+        'Folio':                r.folio,
+        'Fecha Solicitud':      r.fecha,
+        'Nombre':               r.nombre,
+        'No. Empleado':         r.empleado,
+        'Departamento':         r.departamento,
+        'Turno':                r.turno,
+        'No. Troquel':          r.troquel,
+        'Línea / Prensa':       r.linea || '',
+        'Operación':            r.operacion || '',   // ✅ NUEVO
+        'Tipo de Solicitud':    r.tipoSolicitud,
+        'Prioridad':            r.prioridad,
+        'Descripción Problema': r.descripcion || '',
+        'Desc. Refacción':      p.descripcion || '',
+        'Cantidad':             p.cantidad || '',
+        'No. Parte / Plano':    p.noPartePlano || '',
+        'Unidad':               p.unidad || '',
+        'Tiene MRO':            p.tieneMro || '',
+        'MRO':                  p.mro || '',
+        'Aplica Alta MRO':      p.altaMro || '',
+        'Fecha Requerida':      r.fechaRequerida || '',
+        'Autoriza':             r.autoriza || '',
+        'Observaciones':        r.observaciones || ''
+      }));
+    });
+    return rows;
+  }
+
+  let xlsxLoading = null;
+  function loadXlsxLib() {
+    if (window.XLSX) return Promise.resolve();
+    if (xlsxLoading) return xlsxLoading;
+    xlsxLoading = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error('No se pudo cargar la librería de Excel'));
+      document.body.appendChild(script);
+    });
+    return xlsxLoading;
+  }
+
+  function exportExcel() {
+    let toExport = records.length ? records : null;
+    if (!toExport) {
+      const d = getForm();
+      const errs = validate(d);
+      if (errs.length) { showToast('⚠ Guarda primero una solicitud o llena el formulario', 'red'); return; }
+      toExport = [d];
+    }
+
+    showToast('⏳ Preparando Excel…');
+    loadXlsxLib().then(() => {
+      const rows = flatRows(toExport);
+      const ws = XLSX.utils.json_to_sheet(rows);
+      const widths = [14,18,22,12,20,16,12,14,16,28,22,35,30,9,16,10,10,16,12,14,20,32];
+      ws['!cols'] = widths.map(w => ({ wch: w }));
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Solicitudes');
+      const fecha = new Date().toISOString().slice(0,10);
+      XLSX.writeFile(wb, `Refacciones_Troqueles_${fecha}.xlsx`);
+      showToast('✓ Excel descargado (' + toExport.length + ' solicitud' + (toExport.length > 1 ? 'es' : '') + ')', 'green');
+    }).catch(() => {
+      showToast('⚠ No se pudo descargar el Excel (sin acceso al CDN en esta red)', 'red');
+    });
+  }
+
+  function renderHistorial() {
+    const el = document.getElementById('historial-body');
+    if (!records.length) {
+      el.innerHTML = '<p class="hist-empty">No hay solicitudes guardadas aún.</p>';
+      return;
+    }
+    el.innerHTML = records.slice().reverse().map((r, ri) => {
+      const idx = records.length - 1 - ri;
+      const nParts = r.refacciones ? r.refacciones.length : 0;
+      const prioClass = r.prioridad.includes('URGENTE') ? 'badge-urgente' :
+                        r.prioridad.includes('ALTA')    ? 'badge-alta'    :
+                        r.prioridad.includes('MEDIA')   ? 'badge-media'   : 'badge-baja';
+      const prioLabel = r.prioridad.split(' - ')[0];
+      return `<div class="hist-row">
+        <div>
+          <div class="folio-tag">${r.folio} <span class="badge ${prioClass}" style="font-size:10px;">${prioLabel}</span></div>
+          <div class="meta">${r.nombre} · ${r.departamento} · ${r.troquel} · ${nParts} refacción${nParts!==1?'es':''} · ${r.fecha}</div>
+        </div>
+        <div class="hist-actions">
+          <button class="btn-hist-del" onclick="deleteRecord(${idx})">Eliminar</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function deleteRecord(idx) {
+    if (!confirm('¿Eliminar la solicitud ' + records[idx].folio + '?')) return;
+    records.splice(idx, 1);
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(records)); } catch(e) {}
+    renderHistorial();
+  }
+
+  function resetForm() {
+    ['nombre','empleado','linea','operacion','troquel','descripcion','fecha-req','autoriza','obs'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    ['depto','turno','tipo','prioridad'].forEach(id => {
+      document.getElementById(id).selectedIndex = 0;
+    });
+    clearErrors();
+    document.getElementById('parts-body').innerHTML = '';
+    partIdx = 0;
+    updatePartsCount();
+    updateFolioDisplay();
+    addPart();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function showToast(msg, type='') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show' + (type ? ' ' + type : '');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => { t.className = 'toast'; }, 3000);
+  }
+
+  document.getElementById('fecha-req').min = new Date().toISOString().split('T')[0];
+  updateFolioDisplay();
+  addPart();
+  renderHistorial();
+</script>
+</body>
+</html>
